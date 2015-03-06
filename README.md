@@ -18,6 +18,7 @@ An example:
 
 CPU: Intel(R) Xeon(R) CPU E7-L8867  @ 2.13GHz (2128.05-MHz K8-class CPU)
 
+```
 adrian@:~ % cpuset -l 79 ./himenobmtxpa L 127
 mimax = 256 mjmax = 256 mkmax = 512
 imax = 255 jmax = 255 kmax =511
@@ -53,4 +54,4 @@ Loop executed for 36 times
 Gosa : 4.882812e-04 
 MFLOPS measured : 673.042446   cpu : 59.251287
 Score based on Pentium III 600MHz using Fortran 77: 8.207835
-
+```

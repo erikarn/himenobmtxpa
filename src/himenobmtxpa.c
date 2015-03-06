@@ -37,11 +37,16 @@
 ********************************************************************/
 
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include <sys/time.h>
 
 #define MR(mt,n,r,c,d)  mt->m[(n) * mt->mrows * mt->mcols * mt->mdeps + (r) * mt->mcols* mt->mdeps + (c) * mt->mdeps + (d)]
 
+static int g_offset = 0;
+
 struct Mat {
+  void *a;
   float* m;
   int mnums;
   int mrows;
@@ -75,8 +80,9 @@ main(int argc, char *argv[])
   double  cpu0,cpu1,cpu,flop;
   char   size[10];
 
-  if(argc == 2){
+  if(argc == 3){
     strcpy(size,argv[1]);
+    g_offset = atoi(argv[2]);
   } else {
     printf("For example: \n");
     printf(" Grid-size= XS (32x32x64)\n");
@@ -87,6 +93,7 @@ main(int argc, char *argv[])
     printf("Grid-size = ");
     scanf("%s",size);
     printf("\n");
+    g_offset = 0;
   }
 
   set_param(msize,size);
@@ -230,13 +237,17 @@ set_param(int is[],char *size)
 int
 newMat(Matrix* Mat, int mnums,int mrows, int mcols, int mdeps)
 {
+  static uint32_t offset = 0;
+
   Mat->mnums= mnums;
   Mat->mrows= mrows;
   Mat->mcols= mcols;
   Mat->mdeps= mdeps;
   Mat->m= NULL;
-  Mat->m= (float*) 
-    malloc(mnums * mrows * mcols * mdeps * sizeof(float));
+  Mat->a = NULL;
+  Mat->a = malloc(mnums * mrows * mcols * mdeps * sizeof(float) + 4096);
+  Mat->m = (void *) Mat->a + offset;
+  offset += g_offset;
   
   return(Mat->m != NULL) ? 1:0;
 }
@@ -244,8 +255,9 @@ newMat(Matrix* Mat, int mnums,int mrows, int mcols, int mdeps)
 void
 clearMat(Matrix* Mat)
 {
-  if(Mat->m)
-    free(Mat->m);
+  if(Mat->a)
+    free(Mat->a);
+  Mat->a= NULL;
   Mat->m= NULL;
   Mat->mnums= 0;
   Mat->mcols= 0;
